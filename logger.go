@@ -4,27 +4,39 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"strings"
 )
 
 const (
-	LevelFatal = slog.Level(12)
+	Debug = slog.Level(-4)
+	Info  = slog.Level(0)
+	Warn  = slog.Level(4)
+	Error = slog.Level(8)
+	Fatal = slog.Level(12)
 )
 
-func init() {
-	NewLogger(nil)
-}
-
-// NewLogger takes a writer and an optional logging level. It returns a new logger.
+// NewLogger takes a writer and an optional ENV value. It returns a new logger.
 // The default writer is os.Stdout if nil and the logging level is ERROR if not defined.
 // Logging levels: DEBUG = -4, INFO = 0, WARN = 4, ERROR = 8, FATAL = 12.
-func NewLogger(writer io.Writer, level ...slog.Level) (logger *slog.Logger) {
-	logLevel := slog.Level(8)
-
+func NewLogger(writer io.Writer, level ...string) (logger *slog.Logger) {
+	logLevel := Error
+	if len(level) > 0 {
+		setLevel := strings.ToUpper(level[0])
+		switch setLevel {
+		case "DEBUG":
+			logLevel = Debug
+		case "INFO":
+			logLevel = Info
+		case "WARN":
+			logLevel = Warn
+		case "ERROR":
+			logLevel = Error
+		case "FATAL":
+			logLevel = Fatal
+		}
+	}
 	if writer == nil {
 		writer = os.Stdout
-	}
-	if len(level) > 0 {
-		logLevel = level[0]
 	}
 
 	opts := &slog.HandlerOptions{
@@ -34,7 +46,7 @@ func NewLogger(writer io.Writer, level ...slog.Level) (logger *slog.Logger) {
 			if a.Key == slog.LevelKey {
 				level := a.Value.Any().(slog.Level)
 				levelLabel := level.String()
-				if level == LevelFatal {
+				if level == Fatal {
 					levelLabel = "FATAL"
 				}
 				a.Value = slog.StringValue(levelLabel)
