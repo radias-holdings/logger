@@ -4,15 +4,15 @@ The logger package provides a simplified composite literal for creating structur
 
 ## NewLogger
 
- This is the primary function in this package. The `NewLogger` function takes an `io.Writer` (optional), and a logging level (optional). It returns a new logger instance from the slog package.
+ This is the primary function in this package. The `NewLogger` function takes an `io.Writer` (optional), and the `ENV` environment varible (optional). It returns a new logger instance from the slog package.
 
 ```go
-func NewLogger(writer io.Writer, level ...slog.Level) (logger *slog.Logger)
+func NewLogger(writer io.Writer, level ...string) (logger *slog.Logger)
 ```
 
 ## Parameters
 - `writer`: An io.Writer where the log output will be written. This is optional, and if not provided, the logger will default to writing to os.Stdout.
-- `level`: A slog.Level which sets the logging level for the logger. This is optional. If not provided, it defaults to `slog.LevelError`.
+- `level`: A string (`os.Getenv("ENV")`) which sets the logging level for the logger. This is optional. If not provided, it defaults to the error logging level - `slog.LevelError`.
 
 ## Logging Levels
 The logging levels used are:
@@ -30,9 +30,24 @@ Use of the logging package should be used at the top level function such as with
 
 To create a logger with default parameters (writing to `os.Stdout` at ERROR level and above):
 ```go
-log := logger.NewLogger(nil)
+log := logger.NewLogger(nil, os.Getenv("ENV"))
 ...
-// Standard error
+
+// Debugging
+var1, var2, var3, err := exampleFunction()
+log.Debug("exampleFunction has run", "var1", var1, "var2", var2, "var3", var3)
+
+// Information
+_, err := exampleFunction()
+log.Info("exampleFunction has run")
+
+// Warning
+diskSpace, err := diskSpaceChecker()
+if diskSpace >= 80 {
+	log.Warn("disk space is over 80%")
+}
+
+// Error (default level)
 _, err := exampleFunction()
 	if err != nil {
 		log.Error("describe action here", "rsp", err)
@@ -46,7 +61,10 @@ _, err := exampleFunction2()
 	}
 ```
 Outputs:
-```text
+```bash
+time=2023-07-20T16:54:40.558+10:00 level=DEBUG msg="exampleFunction has run" var1="something" var2="something" etc.
+time=2023-07-20T16:54:40.558+10:00 level=INFO msg="exampleFunction has run"
+time=2023-07-20T16:54:40.558+10:00 level=WARN msg="disk space is over 80%"
 time=2023-07-20T16:54:40.558+10:00 level=ERROR msg="describe action here" rsp="error: something in exampleFunction went wrong"
 time=2023-07-20T16:54:40.558+10:00 level=FATAL msg="describe action here" rsp="error: something in exampleFunction2 went very wrong"
 exit status 1
