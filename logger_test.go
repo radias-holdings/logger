@@ -15,7 +15,7 @@ func TestCreateLogger(t *testing.T) {
 
 	c.Convey("Logger initialization", t, func() {
 
-		c.Convey("For default or production environment", func() {
+		c.Convey("For default (no level specified)", func() {
 			buf := &bytes.Buffer{}
 			logger := NewLogger(buf)
 
@@ -30,7 +30,7 @@ func TestCreateLogger(t *testing.T) {
 			})
 
 			c.Convey("Should log FATAL properly", func() {
-				logger.Log(ctx, LevelFatal, "test")
+				logger.Log(ctx, Fatal, "test")
 				output := buf.String()
 
 				c.So(output, c.ShouldContainSubstring, "FATAL")
@@ -48,31 +48,69 @@ func TestCreateLogger(t *testing.T) {
 			buf.Reset()
 		})
 
-		c.Convey("For debug environments (development, test or github pipeline)", func() {
-			for _, env := range []string{"development", "test", "github"} {
+		c.Convey("For DEBUG log level", func() {
+			buf := &bytes.Buffer{}
+			logger := NewLogger(buf, "DEBUG")
 
-				buf := &bytes.Buffer{}
-				logger := NewLogger(buf, env)
+			c.So(logger, c.ShouldNotBeNil)
 
-				c.So(logger, c.ShouldNotBeNil)
+			logger.Debug("Debug message")
+			output := buf.String()
+			c.So(output, c.ShouldContainSubstring, "DEBUG")
 
-				c.Convey("Should log at DEBUG level for "+env, func() {
-					logger.Debug("This log should appear")
-					output := buf.String()
+			buf.Reset()
+		})
 
-					c.So(output, c.ShouldContainSubstring, "DEBUG")
-				})
+		c.Convey("For INFO log level", func() {
+			buf := &bytes.Buffer{}
+			logger := NewLogger(buf, "INFO")
 
-				c.Convey("Debug log should be written properly for "+env, func() {
-					logger.Debug("debugging")
-					output := buf.String()
+			c.So(logger, c.ShouldNotBeNil)
 
-					c.So(output, c.ShouldContainSubstring, "DEBUG")
-					c.So(output, c.ShouldContainSubstring, "debugging")
-				})
+			logger.Info("Info message")
+			output := buf.String()
+			c.So(output, c.ShouldContainSubstring, "INFO")
 
-				buf.Reset()
-			}
+			buf.Reset()
+		})
+
+		c.Convey("For WARN log level", func() {
+			buf := &bytes.Buffer{}
+			logger := NewLogger(buf, "WARN")
+
+			c.So(logger, c.ShouldNotBeNil)
+
+			logger.Warn("Warn message")
+			output := buf.String()
+			c.So(output, c.ShouldContainSubstring, "WARN")
+
+			buf.Reset()
+		})
+
+		c.Convey("For ERROR log level", func() {
+			buf := &bytes.Buffer{}
+			logger := NewLogger(buf, "ERROR")
+
+			c.So(logger, c.ShouldNotBeNil)
+
+			logger.Error("Error message")
+			output := buf.String()
+			c.So(output, c.ShouldContainSubstring, "ERROR")
+
+			buf.Reset()
+		})
+
+		c.Convey("For FATAL log level", func() {
+			buf := &bytes.Buffer{}
+			logger := NewLogger(buf, "FATAL")
+
+			c.So(logger, c.ShouldNotBeNil)
+
+			logger.Log(ctx, Fatal, "Fatal message")
+			output := buf.String()
+			c.So(output, c.ShouldContainSubstring, "FATAL")
+
+			buf.Reset()
 		})
 	})
 }

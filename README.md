@@ -4,7 +4,7 @@ The logger package provides a simplified composite literal for creating structur
 
 ## NewLogger
 
- This is the primary function in this package. The `NewLogger` function takes an `io.Writer` (optional), and the `ENV` environment varible (optional). It returns a new logger instance from the slog package.
+ This is the primary function in this package. The `NewLogger` function takes an `io.Writer` (optional), and the `LOG_LEVEL` environment varible (optional). It returns a new logger instance from the slog package.
 
 ```go
 func NewLogger(writer io.Writer, level ...string) (logger *slog.Logger)
@@ -12,7 +12,7 @@ func NewLogger(writer io.Writer, level ...string) (logger *slog.Logger)
 
 ## Parameters
 - `writer`: An io.Writer where the log output will be written. This is optional, and if not provided, the logger will default to writing to os.Stdout.
-- `level`: A string (`os.Getenv("ENV")`) which sets the logging level for the logger. This is optional. If not provided, it defaults to the error logging level - `slog.LevelError`.
+- `level`: A string (`os.Getenv("LOG_LEVEL")`) which sets the logging level for the logger. This is optional. If not provided, it defaults to the error logging level - `slog.LevelError`.
 
 ## Logging Levels
 The logging levels used are:
@@ -30,7 +30,7 @@ Use of the logging package should be used at the top level function such as with
 
 To create a logger with default parameters (writing to `os.Stdout` at ERROR level and above):
 ```go
-log := logger.NewLogger(nil, os.Getenv("ENV"))
+log := logger.NewLogger(nil, os.Getenv("LOG_LEVEL"))
 ...
 
 // Debugging
@@ -54,9 +54,11 @@ _, err := exampleFunction()
 	}
 
 // Fatal
+ctx := context.Background()
+...
 _, err := exampleFunction2()
 	if err != nil {
-		log.Log(context.Background(), logger.LevelFatal, "describe action here", "rsp", err)
+		log.Log(ctx, logger.Fatal, "describe action here", "rsp", err)
 		os.Exit(1)
 	}
 ```
