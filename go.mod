@@ -1,4 +1,4 @@
-module github.com/fzer0zer0/logger
+module github.com/radias-holdings/logger
 
 go 1.21
 
