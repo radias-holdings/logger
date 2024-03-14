@@ -2,9 +2,7 @@ module github.com/radias-holdings/logger
 
 go 1.21
 
-require (
-	github.com/smartystreets/goconvey v1.8.1
-)
+require github.com/smartystreets/goconvey v1.8.1
 
 require (
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
